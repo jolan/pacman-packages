@@ -1,0 +1,29 @@
+
+# Maintainer: WinterMute <davem@devkitpro.org>
+pkgname=switch-libzstd
+pkgver=1.4.0
+pkgrel=1
+pkgdesc='Zstd, short for Zstandard, is a fast lossless compression algorithm, targeting real-time compression scenarios at zlib-level compression ratio (for Nintendo Switch homebrew development)'
+arch=('any')
+url='https://zstd.net'
+license=('BSD and GPLv2')
+options=(!strip libtool staticlibs)
+source=("https://github.com/facebook/zstd/releases/download/v$pkgver/zstd-$pkgver.tar.gz")
+sha256sums=('7f323f0e0c18488748f3d9b2d4353f00e904ea2ccd0372ea04d7f77aa1156557')
+makedepends=('devkitpro-pkgbuild-helpers')
+
+build() {
+  source /opt/devkitpro/switchvars.sh
+  cd zstd-$pkgver/lib
+
+  make CC=${TOOL_PREFIX}gcc PREFIX=${PORTLIBS_PREFIX} libzstd.a libzstd.pc
+}
+
+package() {
+  source /opt/devkitpro/switchvars.sh
+  cd zstd-$pkgver/lib
+  make DESTDIR="$pkgdir" PREFIX=${PORTLIBS_PREFIX} install-pc install-static install-includes
+  install -d "$pkgdir"/opt/devkitpro/portlibs/switch/licenses/$pkgname
+  install ../COPYING "$pkgdir"/opt/devkitpro/portlibs/switch/licenses/$pkgname/COPYING
+  install ../LICENSE "$pkgdir"/opt/devkitpro/portlibs/switch/licenses/$pkgname/LICENSE
+}
