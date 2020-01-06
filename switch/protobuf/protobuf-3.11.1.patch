@@ -1,0 +1,56 @@
+// TODO need to just disable building of the compiler since it's
+// expected to use the host's compiler instead
+diff --unified --recursive --text protobuf-3.11.1.orig/src/google/protobuf/compiler/command_line_interface.cc protobuf-3.11.1.new/src/google/protobuf/compiler/command_line_interface.cc
+--- protobuf-3.11.1.orig/src/google/protobuf/compiler/command_line_interface.cc	2019-12-13 23:43:49.704749818 -0600
++++ protobuf-3.11.1.new/src/google/protobuf/compiler/command_line_interface.cc	2019-12-13 23:45:53.274140566 -0600
+@@ -204,7 +204,7 @@
+   }
+ #else
+   char buffer[PATH_MAX];
+-  int len = readlink("/proc/self/exe", buffer, PATH_MAX);
++  int len = 0;
+ #endif
+   if (len > 0) {
+     path->assign(buffer, len);
+diff --unified --recursive --text protobuf-3.11.1.orig/src/google/protobuf/compiler/subprocess.cc protobuf-3.11.1.new/src/google/protobuf/compiler/subprocess.cc
+--- protobuf-3.11.1.orig/src/google/protobuf/compiler/subprocess.cc	2019-12-13 23:43:49.704749818 -0600
++++ protobuf-3.11.1.new/src/google/protobuf/compiler/subprocess.cc	2019-12-13 23:46:13.377374813 -0600
+@@ -307,8 +307,8 @@
+   int stdin_pipe[2];
+   int stdout_pipe[2];
+ 
+-  GOOGLE_CHECK(pipe(stdin_pipe) != -1);
+-  GOOGLE_CHECK(pipe(stdout_pipe) != -1);
++  //GOOGLE_CHECK(pipe(stdin_pipe) != -1);
++  //GOOGLE_CHECK(pipe(stdout_pipe) != -1);
+ 
+   char* argv[2] = {portable_strdup(program.c_str()), NULL};
+ 
+@@ -327,10 +327,10 @@
+ 
+     switch (search_mode) {
+       case SEARCH_PATH:
+-        execvp(argv[0], argv);
++        //execvp(argv[0], argv);
+         break;
+       case EXACT_NAME:
+-        execv(argv[0], argv);
++        //execv(argv[0], argv);
+         break;
+     }
+ 
+@@ -435,12 +435,7 @@
+     child_stdin_ = -1;
+   }
+ 
+-  int status;
+-  while (waitpid(child_pid_, &status, 0) == -1) {
+-    if (errno != EINTR) {
+-      GOOGLE_LOG(FATAL) << "waitpid: " << strerror(errno);
+-    }
+-  }
++  int status = 0;
+ 
+   // Restore SIGPIPE handling.
+   signal(SIGPIPE, old_pipe_handler);
+Only in protobuf-3.11.1.new/src/google/protobuf/compiler: subprocess.cc.orig

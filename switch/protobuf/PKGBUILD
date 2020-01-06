@@ -1,0 +1,53 @@
+# Maintainer: Jolan Luff <devkitpro@jolan.org>
+
+pkgbase='protobuf'
+pkgname=('switch-protobuf')
+pkgver=3.11.1
+pkgrel=1
+pkgdesc="Protocol Buffers - Google's data interchange format"
+arch=('any')
+url='https://developers.google.com/protocol-buffers/'
+license=('BSD')
+options=(!strip libtool staticlibs)
+depends=('gcc-libs' 'glibc' 'zlib')
+makedepends=('unzip')
+source=("https://github.com/protocolbuffers/$pkgbase/releases/download/v$pkgver/$pkgbase-all-$pkgver.tar.gz" "protobuf-${pkgver}.patch")
+sha512sums=('7922f7d082cba1f39db618e4167890f0cf1257269d43912ea474379cb1cf85dd876e546b26eb46af0f0bdc0f95c2234313ce5aa2d8756cad9fa1b98f7c1d61e5'
+            '5dffb63bc1b7f33ea8ab304f64e81c401056ca09ed0f47b61fd9dfd1bf8a934dce44ced2d66606534f4bb96049fd894997be6d161b5109f53b5a34a64ee8fbfc')
+
+prepare() {
+  cd "$pkgbase-$pkgver"
+  autoreconf -vfi
+}
+
+build() {
+  cd "$pkgbase-$pkgver"
+
+  source /opt/devkitpro/switchvars.sh
+
+  patch -p1 -i $srcdir/protobuf-3.11.1.patch
+
+  ./configure --prefix="${PORTLIBS_PREFIX}" --host=aarch64-none-elf \
+  --disable-shared --enable-static \
+  --with-protoc=protoc
+
+  make V=1
+}
+
+#check() {
+#  cd "$pkgbase-$pkgver"
+#  make check
+#}
+
+package() {
+  #provides=('libprotoc.a' 'libprotobuf.a' 'libprotobuf-lite.a')
+
+  cd "$pkgbase-$pkgver"
+
+  source /opt/devkitpro/switchvars.sh
+
+  make DESTDIR="$pkgdir" install
+  rm $pkgdir/opt/devkitpro/portlibs/switch/bin/protoc
+
+  install -vDm 644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname"
+}
